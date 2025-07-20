@@ -1,0 +1,36 @@
+/* تنسيقات عامة */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* تنسيقات للغة العربية */
+[dir="rtl"] {
+    text-align: right;
+}
+
+/* تنسيقات القائمة الجانبية */
+.sidebar .sidebar-content {
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    color: white;
+}
+
+/* تنسيقات الأزرار */
+.stButton>button {
+    border-radius: 20px;
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+}
+
+/* تنسيقات مربعات الاختيار */
+.stCheckbox {
+    margin-bottom: 1rem;
+}
+
+/* تنسيقات الجداول */
+.stDataFrame {
+    width: 100%;
+    max-height: 500px;
+    overflow: auto;
+}
