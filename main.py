@@ -16,7 +16,7 @@ st.set_page_config(
 
 # تحميل الترجمة
 current_language = setup_language()
-_ = get_translation(current_language)
+get_translation(current_language, "Home")
 
 # شريط التنقل العلوي
 st.markdown(utils.load_css(), unsafe_allow_html=True)
