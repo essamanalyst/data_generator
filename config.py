@@ -9,11 +9,11 @@ def setup_language() -> str:
         st.session_state.language = "en"
     return st.session_state.language
 
-def get_translation(lang: str) -> Dict[str, str]:
-    """Load translations for the selected language"""
+def get_translation(lang: str, key: str) -> str:  # <-- تغيير هنا
+    """Load translations for the selected language and key"""
     with open("assets/translations.json", "r", encoding="utf-8") as f:
         translations = json.load(f)
-    return translations.get(lang, translations["en"])
+    return translations.get(lang, translations["en"]).get(key, key)
 
 def switch_language():
     """Toggle between English and Arabic"""
