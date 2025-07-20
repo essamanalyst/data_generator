@@ -16,32 +16,31 @@ st.set_page_config(
 
 # تحميل الترجمة
 current_language = setup_language()
-get_translation(current_language, "Home")
 
 # شريط التنقل العلوي
 st.markdown(utils.load_css(), unsafe_allow_html=True)
 
 # القائمة الرئيسية
 menu_options = {
-    "home": _("Home"),
-    "generate": _("Generate Data"),
-    "export": _("Export Data"),
-    "connect": _("Connect to BI Tools"),
-    "settings": _("Settings")
+    "home": get_translation(current_language, "Home"),
+    "generate": get_translation(current_language, "Generate Data"),
+    "export": get_translation(current_language, "Export Data"),
+    "connect": get_translation(current_language, "Connect to BI Tools"),
+    "settings": get_translation(current_language, "Settings")
 }
 
 with st.sidebar:
     st.image("assets/logo.png", width=150)
     selected_menu = st.radio(
-        _("Main Menu"),
+        get_translation(current_language, "Main Menu"),
         list(menu_options.keys()),
         format_func=lambda x: menu_options[x]
     )
 
 # الصفحة الرئيسية
 if selected_menu == "home":
-    st.title(_("Professional Data Generator"))
-    st.markdown(_("""
+    st.title(get_translation(current_language, "Professional Data Generator"))
+    st.markdown(get_translation(current_language, """
     ## Welcome to Data Generator Pro
     
     This powerful tool allows you to:
@@ -53,40 +52,40 @@ if selected_menu == "home":
 
 # صفحة توليد البيانات
 elif selected_menu == "generate":
-    st.title(_("Data Generation"))
+    st.title(get_translation(current_language, "Data Generation"))
     
     # البحث عن نموذج البيانات
-    search_term = st.text_input(_("Search for data model..."))
+    search_term = st.text_input(get_translation(current_language, "Search for data model..."))
     available_models = get_available_models(search_term)
     
     if available_models:
         selected_model = st.selectbox(
-            _("Select Data Model"),
+            get_translation(current_language, "Select Data Model"),
             available_models,
             format_func=lambda x: x.name
         )
         
         # عرض تفاصيل النموذج
         if selected_model:
-            with st.expander(_("Model Details")):
+            with st.expander(get_translation(current_language, "Model Details")):
                 st.write(selected_model.description)
                 st.json(selected_model.schema)
             
             # تخصيص النموذج
-            with st.expander(_("Customize Fields")):
+            with st.expander(get_translation(current_language, "Customize Fields")):
                 customized_fields = []
                 for field in selected_model.fields:
                     col1, col2 = st.columns(2)
                     with col1:
                         enabled = st.checkbox(
-                            f"Enable {field.name}",
+                            f"{get_translation(current_language, 'Enable')} {field.name}",
                             value=True,
                             key=f"enable_{field.name}"
                         )
                     with col2:
                         if enabled:
                             field_type = st.selectbox(
-                                f"Type for {field.name}",
+                                f"{get_translation(current_language, 'Type for')} {field.name}",
                                 field.available_types,
                                 index=field.available_types.index(field.type),
                                 key=f"type_{field.name}"
@@ -94,14 +93,14 @@ elif selected_menu == "generate":
                             customized_fields.append(field.copy(update={"type": field_type}))
             
             # إعدادات التوليد
-            with st.expander(_("Generation Settings")):
-                rows = st.number_input(_("Number of Rows"), 1, 10000000, 1000)
-                batch_size = st.number_input(_("Batch Size"), 1, 100000, 1000)
-                seed = st.number_input(_("Random Seed"), value=42)
+            with st.expander(get_translation(current_language, "Generation Settings")):
+                rows = st.number_input(get_translation(current_language, "Number of Rows"), 1, 10000000, 1000)
+                batch_size = st.number_input(get_translation(current_language, "Batch Size"), 1, 100000, 1000)
+                seed = st.number_input(get_translation(current_language, "Random Seed"), value=42)
             
             # توليد البيانات
-            if st.button(_("Generate Data")):
-                with st.spinner(_("Generating data...")):
+            if st.button(get_translation(current_language, "Generate Data")):
+                with st.spinner(get_translation(current_language, "Generating data...")): 
                     data = generate_data(
                         model=selected_model.copy(update={"fields": customized_fields}),
                         rows=rows,
@@ -109,65 +108,65 @@ elif selected_menu == "generate":
                         seed=seed
                     )
                     st.session_state.generated_data = data
-                    st.success(_(f"Successfully generated {rows} rows of data!"))
+                    st.success(get_translation(current_language, f"Successfully generated {rows} rows of data!"))
                     st.dataframe(data.head(50))
 
 # صفحة التصدير
 elif selected_menu == "export":
-    st.title(_("Export Data"))
+    st.title(get_translation(current_language, "Export Data"))
     
     if "generated_data" not in st.session_state:
-        st.warning(_("No data to export. Please generate data first."))
+        st.warning(get_translation(current_language, "No data to export. Please generate data first."))
     else:
         data = st.session_state.generated_data
         
         # خيارات التصدير
         export_format = st.selectbox(
-            _("Export Format"),
+            get_translation(current_language, "Export Format"),
             ["CSV", "Excel", "JSON", "Parquet", "SQL", "Cloud Storage"]
         )
         
         if export_format in ["CSV", "Excel", "JSON", "Parquet"]:
-            file_name = st.text_input(_("File Name"), "generated_data")
-            if st.button(_("Export")):
+            file_name = st.text_input(get_translation(current_language, "File Name"), "generated_data")
+            if st.button(get_translation(current_language, "Export")):
                 output = export_data(data, export_format.lower(), file_name)
-                st.success(_(f"Data exported successfully to {output}"))
+                st.success(get_translation(current_language, f"Data exported successfully to {output}"))
                 with open(output, "rb") as f:
                     st.download_button(
-                        label=_("Download File"),
+                        label=get_translation(current_language, "Download File"),
                         data=f,
                         file_name=os.path.basename(output)
                     )
         
         elif export_format == "SQL":
-            db_type = st.selectbox(_("Database Type"), ["MySQL", "PostgreSQL", "SQLite"])
-            connection_string = st.text_input(_("Connection String"))
-            table_name = st.text_input(_("Table Name"), "generated_data")
-            if st.button(_("Export to Database")):
-                with st.spinner(_("Exporting to database...")):
+            db_type = st.selectbox(get_translation(current_language, "Database Type"), ["MySQL", "PostgreSQL", "SQLite"])
+            connection_string = st.text_input(get_translation(current_language, "Connection String"))
+            table_name = st.text_input(get_translation(current_language, "Table Name"), "generated_data")
+            if st.button(get_translation(current_language, "Export to Database")):
+                with st.spinner(get_translation(current_language, "Exporting to database...")):
                     export_data(data, "sql", table_name, db_type, connection_string)
-                    st.success(_("Data exported to database successfully!"))
+                    st.success(get_translation(current_language, "Data exported to database successfully!"))
         
         elif export_format == "Cloud Storage":
-            cloud_provider = st.selectbox(_("Cloud Provider"), ["AWS S3", "Google Cloud Storage", "Azure Blob"])
-            bucket_name = st.text_input(_("Bucket Name"))
-            file_path = st.text_input(_("File Path"), "generated_data.parquet")
-            if st.button(_("Upload to Cloud")):
-                with st.spinner(_("Uploading to cloud storage...")):
+            cloud_provider = st.selectbox(get_translation(current_language, "Cloud Provider"), ["AWS S3", "Google Cloud Storage", "Azure Blob"])
+            bucket_name = st.text_input(get_translation(current_language, "Bucket Name"))
+            file_path = st.text_input(get_translation(current_language, "File Path"), "generated_data.parquet")
+            if st.button(get_translation(current_language, "Upload to Cloud")):
+                with st.spinner(get_translation(current_language, "Uploading to cloud storage...")):
                     export_data(data, "cloud", file_path, cloud_provider, bucket_name)
-                    st.success(_("Data uploaded to cloud storage successfully!"))
+                    st.success(get_translation(current_language, "Data uploaded to cloud storage successfully!"))
 
 # صفحة الاتصال بأدوات BI
 elif selected_menu == "connect":
-    st.title(_("Connect to BI Tools"))
+    st.title(get_translation(current_language, "Connect to BI Tools"))
     
     bi_tool = st.selectbox(
-        _("Select BI Tool"),
+        get_translation(current_language, "Select BI Tool"),
         ["Tableau", "Power BI", "Looker", "Metabase"]
     )
     
     if bi_tool == "Tableau":
-        st.markdown(_("""
+        st.markdown(get_translation(current_language, """
         ### Tableau Integration
         1. For live connection, use the database export option
         2. For extracted data, download as CSV/Excel and connect
@@ -175,37 +174,37 @@ elif selected_menu == "connect":
         """))
     
     elif bi_tool == "Power BI":
-        st.markdown(_("""
+        st.markdown(get_translation(current_language, """
         ### Power BI Integration
         1. Use 'Get Data' and select the appropriate source
         2. For cloud storage, use the respective connector
         3. For databases, use the SQL connection
         """))
     
-    st.info(_("For advanced integration, please contact support."))
+    st.info(get_translation(current_language, "For advanced integration, please contact support."))
 
 # صفحة الإعدادات
 elif selected_menu == "settings":
-    st.title(_("Settings"))
+    st.title(get_translation(current_language, "Settings"))
     
     # إعدادات اللغة
     new_language = st.selectbox(
-        _("Language"),
+        get_translation(current_language, "Language"),
         ["English", "العربية"],
         index=0 if current_language == "en" else 1
     )
     
-    if st.button(_("Save Settings")):
+    if st.button(get_translation(current_language, "Save Settings")):
         st.session_state.language = "en" if new_language == "English" else "ar"
         st.experimental_rerun()
     
     # إعدادات الأداء
-    st.subheader(_("Performance Settings"))
-    cache_size = st.slider(_("Cache Size (MB)"), 10, 1000, 100)
-    max_threads = st.slider(_("Max Threads"), 1, 16, 4)
+    st.subheader(get_translation(current_language, "Performance Settings"))
+    cache_size = st.slider(get_translation(current_language, "Cache Size (MB)"), 10, 1000, 100)
+    max_threads = st.slider(get_translation(current_language, "Max Threads"), 1, 16, 4)
     
     # معلومات النظام
-    st.subheader(_("System Information"))
-    st.text(_(f"Streamlit version: {st.__version__}"))
-    st.text(_(f"Python version: {utils.get_python_version()}"))
-    st.text(_(f"OS: {utils.get_os_info()}"))
+    st.subheader(get_translation(current_language, "System Information"))
+    st.text(get_translation(current_language, f"Streamlit version: {st.__version__}"))
+    st.text(get_translation(current_language, f"Python version: {utils.get_python_version()}"))
+    st.text(get_translation(current_language, f"OS: {utils.get_os_info()}"))
