@@ -1,6 +1,7 @@
 import json
 import os
 from typing import Dict
+import streamlit as st
 
 def setup_language() -> str:
     """Initialize language settings"""
