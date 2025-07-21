@@ -2,14 +2,18 @@ import platform
 import sys
 import streamlit as st
 
+@st.cache_data
 def load_css() -> str:
-    """Load custom CSS styles"""
-    with open("assets/styles.css", "r") as f:
-        return f"<style>{f.read()}</style>"
+    """Load CSS styles with caching"""
+    try:
+        with open("assets/styles.css", "r") as f:
+            return f"<style>{f.read()}</style>"
+    except FileNotFoundError:
+        return "<style></style>"
 
 def get_python_version() -> str:
     """Get Python version information"""
-    return sys.version
+    return sys.version.split()[0]
 
 def get_os_info() -> str:
     """Get operating system information"""
@@ -18,3 +22,14 @@ def get_os_info() -> str:
 def format_number(number: int) -> str:
     """Format large numbers with commas"""
     return "{:,}".format(number)
+
+@st.cache_data
+def measure_performance(func):
+    """Decorator to measure function performance"""
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        st.caption(f"Function '{func.__name__}' executed in {end_time-start_time:.4f} seconds")
+        return result
+    return wrapper
