@@ -213,7 +213,9 @@ elif selected_menu == "settings":
     
     if st.button(get_translation(current_language, "Save Settings")):
         st.session_state.language = "en" if new_language == "English" else "ar"
-        st.experimental_rerun()
+        # استبدال st.experimental_rerun() بـ:
+        time.sleep(0.1) 
+        st.rerun()
     
     # إعدادات الأداء
     st.subheader(get_translation(current_language, "Performance Settings"))
