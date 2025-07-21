@@ -3,17 +3,24 @@ import os
 from typing import Dict
 import streamlit as st
 
+@st.cache_data
+def load_translations() -> dict:
+    """Load translations with caching"""
+    with open("assets/translations.json", "r", encoding="utf-8") as f:
+        return json.load(f)
+
 def setup_language() -> str:
     """Initialize language settings"""
     if "language" not in st.session_state:
         st.session_state.language = "en"
     return st.session_state.language
 
-def get_translation(lang: str, key: str) -> str:  # <-- تغيير هنا
-    """Load translations for the selected language and key"""
-    with open("assets/translations.json", "r", encoding="utf-8") as f:
-        translations = json.load(f)
-    return translations.get(lang, translations["en"]).get(key, key)
+@st.cache_data
+def get_translation(lang: str, key: str) -> str:
+    """Get translation for specific key with caching"""
+    translations = load_translations()
+    lang_data = translations.get(lang, translations["en"])
+    return lang_data.get(key, key)
 
 def switch_language():
     """Toggle between English and Arabic"""
