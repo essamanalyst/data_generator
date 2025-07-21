@@ -6,6 +6,9 @@ from exporter import export_data
 import utils
 import os
 import time
+from streamlit.runtime.scriptrunner import add_script_run_ctx
+from streamlit.runtime.scriptrunner import get_script_run_ctx
+import threading
 
 # إعداد الصفحة
 st.set_page_config(
@@ -118,7 +121,7 @@ elif selected_menu == "generate":
                         batch_size=batch_size,
                         seed=seed,
                         progress_callback=lambda p: (progress_bar.progress(p), 
-                                                  status_text.text(f"Progress: {p*100:.1f}%"))
+                                                  status_text.text(f"Progress: {p*100:.1f}%")))
                     
                     gen_time = time.time() - start_time
                     st.session_state.generated_data = data
@@ -146,13 +149,21 @@ elif selected_menu == "export":
         if export_format in ["CSV", "Excel", "JSON", "Parquet"]:
             file_name = st.text_input(get_translation(current_language, "File Name"), "generated_data")
             if st.button(get_translation(current_language, "Export")):
-                output = export_data(data, export_format.lower(), file_name)
-                st.success(get_translation(current_language, f"Data exported successfully to {output}"))
-                with open(output, "rb") as f:
+                with st.spinner(get_translation(current_language, "Preparing export...")):
+                    file_data, file_path = export_data(
+                        data, 
+                        export_format.lower(), 
+                        file_name
+                    )
+                    
+                    st.success(get_translation(current_language, 
+                        f"Data prepared for export as {file_path}"))
+                    
                     st.download_button(
                         label=get_translation(current_language, "Download File"),
-                        data=f,
-                        file_name=os.path.basename(output)
+                        data=file_data,
+                        file_name=file_path,
+                        mime="application/octet-stream"
                     )
         
         elif export_format == "SQL":
