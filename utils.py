@@ -1,7 +1,7 @@
 import platform
 import sys
 import streamlit as st
-
+import time
 @st.cache_data
 def load_css() -> str:
     """Load CSS styles with caching"""
