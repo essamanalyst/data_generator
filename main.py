@@ -5,6 +5,7 @@ from generator import generate_data
 from exporter import export_data
 import utils
 import os
+import time
 
 # إعداد الصفحة
 st.set_page_config(
@@ -54,9 +55,15 @@ if selected_menu == "home":
 elif selected_menu == "generate":
     st.title(get_translation(current_language, "Data Generation"))
     
-    # البحث عن نموذج البيانات
+    # البحث عن نموذج البيانات مع مؤشر تحميل
     search_term = st.text_input(get_translation(current_language, "Search for data model..."))
-    available_models = get_available_models(search_term)
+    
+    start_time = time.time()
+    with st.spinner(get_translation(current_language, "Loading models...")):
+        available_models = get_available_models(search_term)
+        load_time = time.time() - start_time
+    
+    st.caption(f"Loaded {len(available_models)} models in {load_time:.2f} seconds")
     
     if available_models:
         selected_model = st.selectbox(
@@ -100,16 +107,26 @@ elif selected_menu == "generate":
             
             # توليد البيانات
             if st.button(get_translation(current_language, "Generate Data")):
-                with st.spinner(get_translation(current_language, "Generating data...")): 
+                progress_bar = st.progress(0)
+                status_text = st.empty()
+                
+                start_time = time.time()
+                with st.spinner(get_translation(current_language, "Generating data...")):
                     data = generate_data(
                         model=selected_model.copy(update={"fields": customized_fields}),
                         rows=rows,
                         batch_size=batch_size,
-                        seed=seed
-                    )
+                        seed=seed,
+                        progress_callback=lambda p: (progress_bar.progress(p), 
+                                                  status_text.text(f"Progress: {p*100:.1f}%"))
+                    
+                    gen_time = time.time() - start_time
                     st.session_state.generated_data = data
-                    st.success(get_translation(current_language, f"Successfully generated {rows} rows of data!"))
+                    st.success(get_translation(current_language, 
+                        f"Successfully generated {rows:,} rows in {gen_time:.2f} seconds!"))
                     st.dataframe(data.head(50))
+
+
 
 # صفحة التصدير
 elif selected_menu == "export":
